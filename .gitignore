@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build outputs
+dist/
+target/
+*.jar
+*.class
+
+# Environment & secrets
+.env
+.env.*
+*.pem
+*.pfx
+AZURE_STORAGE_CONNECTION_STRING*
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.DS_Store/
+
+# Logs
+*.log
+logs/
+
+# OS
+Thumbs.db
