@@ -1,0 +1,18 @@
+[Unit]
+Description=Online Education Platform Spring Boot
+After=network.target mysql.service redis.service
+
+[Service]
+Type=simple
+User=azureuser
+WorkingDirectory=/home/azureuser/online-edu
+ExecStart=/usr/bin/java -jar /home/azureuser/online-edu/app.jar
+SuccessExitStatus=143
+Restart=always
+RestartSec=10
+Environment="SPRING_PROFILES_ACTIVE=prod"
+# Azure Storage connection string (set in /etc/systemd/system/online-edu.env or environment)
+# Environment="AZURE_STORAGE_CONNECTION_STRING=DefaultEndpointsProtocol=https;AccountName=...;AccountKey=...;EndpointSuffix=core.windows.net"
+
+[Install]
+WantedBy=multi-user.target
