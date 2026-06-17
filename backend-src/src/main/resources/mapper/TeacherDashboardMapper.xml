@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.onlineedu.mapper.TeacherDashboardMapper">
+
+    <!-- 1. 总览：聚合 course 表冗余字段 -->
+    <select id="selectOverview" resultType="com.example.onlineedu.domain.vo.TeacherDashboardOverviewVO">
+        SELECT COUNT(*)                                                               AS courseCount,
+               (SELECT COUNT(DISTINCT ce.user_id)
+                FROM course_enrollment ce
+                         JOIN course c2 ON ce.course_id = c2.id
+                WHERE c2.teacher_id = #{teacherId}
+                  AND ce.is_deleted = 0
+                  AND c2.is_deleted = 0)                                              AS studentCount,
+               IFNULL(SUM(like_count), 0)                                             AS likeCount,
+               IFNULL(SUM(favorite_count), 0)                                         AS favoriteCount,
+               IFNULL(SUM(review_count), 0)                                           AS reviewCount,
+               ROUND(AVG(CASE WHEN review_count > 0 THEN avg_score ELSE NULL END), 1) AS avgScore
+        FROM course
+        WHERE teacher_id = #{teacherId}
+          AND is_deleted = 0
+    </select>
+
+    <!-- 2a. 每日新增学员（按报名时间分组） -->
+    <select id="selectDailyNewStudents" resultType="com.example.onlineedu.domain.dto.DateCountDTO">
+        SELECT
+            DATE_FORMAT(e.enroll_time, '%Y-%m-%d') AS date,
+            COUNT(DISTINCT e.user_id) AS count
+        FROM course_enrollment e
+                 JOIN course c ON c.id = e.course_id AND c.is_deleted = 0
+        WHERE c.teacher_id = #{teacherId}
+          AND e.is_deleted = 0
+          AND DATE(e.enroll_time) &gt;= #{startDate}
+        GROUP BY DATE_FORMAT(e.enroll_time, '%Y-%m-%d')
+        ORDER BY date ASC
+    </select>
+
+    <!-- 2b. 每日活跃学习人数（按 last_learn_time 分组） -->
+    <select id="selectDailyActiveStudents" resultType="com.example.onlineedu.domain.dto.DateCountDTO">
+        SELECT
+            DATE_FORMAT(e.last_learn_time, '%Y-%m-%d') AS date,
+            COUNT(DISTINCT e.user_id)                  AS count
+        FROM course_enrollment e
+        JOIN course c ON c.id = e.course_id AND c.is_deleted = 0
+        WHERE c.teacher_id = #{teacherId}
+          AND e.is_deleted = 0
+          AND e.last_learn_time IS NOT NULL
+          AND DATE(e.last_learn_time) &gt;= #{startDate}
+        GROUP BY DATE_FORMAT(e.last_learn_time, '%Y-%m-%d')
+        ORDER BY date ASC
+    </select>
+
+    <!-- 3. 评分分布 -->
+    <select id="selectRatingDist" resultType="com.example.onlineedu.domain.dto.RatingCountDTO">
+        SELECT r.rating AS rating, COUNT(*) AS count
+        FROM course_review r
+        JOIN course c ON c.id = r.course_id AND c.is_deleted = 0
+        WHERE c.teacher_id = #{teacherId}
+          AND r.is_deleted = 0
+        GROUP BY r.rating
+        ORDER BY r.rating DESC
+    </select>
+
+    <!-- 4a. 学习人数 Top10 -->
+    <select id="selectStudentCountRank" resultType="com.example.onlineedu.domain.vo.CourseRankItemVO">
+        SELECT id AS courseId, course_name AS courseName, student_count AS value
+        FROM course
+        WHERE teacher_id = #{teacherId}
+          AND is_deleted = 0
+        ORDER BY student_count DESC
+        LIMIT 10
+    </select>
+
+    <!-- 4b. 评分 Top10（仅有评价的课程） -->
+    <select id="selectScoreRank" resultType="com.example.onlineedu.domain.vo.CourseRankItemVO">
+        SELECT id AS courseId, course_name AS courseName, avg_score AS value
+        FROM course
+        WHERE teacher_id = #{teacherId}
+          AND is_deleted = 0
+          AND review_count > 0
+        ORDER BY avg_score DESC
+        LIMIT 10
+    </select>
+
+</mapper>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.onlineedu.mapper.RecommendMapper">
+
+    <!-- 用户-课程评分结果映射 -->
+    <resultMap id="UserCourseScoreMap" type="com.example.onlineedu.domain.dto.UserCourseScore">
+        <result column="user_id"     property="userId"/>
+        <result column="course_id"   property="courseId"/>
+        <result column="total_score" property="totalScore"/>
+    </resultMap>
+
+    <!--
+        查询目标用户对各课程的加权行为评分
+        行为权重：报名=5 / 完成课程（按比例）=4 / 收藏=3 / 点赞=2
+    -->
+    <select id="getUserBehaviorScores" resultMap="UserCourseScoreMap">
+        SELECT course_id, SUM(score) AS total_score
+        FROM (
+
+                 -- 报名
+                 SELECT course_id, 5 AS score
+                 FROM course_enrollment
+                 WHERE user_id = #{userId}
+
+                 UNION ALL
+
+                 --  学习完成比例
+                 SELECT
+                     c.course_id,
+                     4 * (
+                         COUNT(DISTINCT CASE WHEN lp.is_completed = 1 THEN c.id END)
+                             / NULLIF(COUNT(DISTINCT c.id),0)
+                         ) AS score
+                 FROM course_chapter c
+                 LEFT JOIN learning_progress lp
+                      ON lp.chapter_id = c.id
+                      AND lp.user_id = #{userId}
+                 GROUP BY c.course_id
+
+                 UNION ALL
+
+                 -- 收藏
+                 SELECT course_id, 3 AS score
+                 FROM course_favorite
+                 WHERE user_id = #{userId}
+                   AND is_deleted = 0
+
+                 UNION ALL
+
+                 -- 点赞
+                 SELECT course_id, 2 AS score
+                 FROM course_like
+                 WHERE user_id = #{userId}
+                   AND is_deleted = 0
+
+             ) t
+        GROUP BY course_id
+        HAVING course_id IS NOT NULL
+           AND total_score > 0
+    </select>
+
+    <!--
+        查询全量用户-课程行为加权评分
+        用于构建 ItemCF 课程-课程余弦相似度矩阵
+    -->
+    <select id="getAllUserCourseScores" resultMap="UserCourseScoreMap">
+        SELECT user_id, course_id, SUM(score) AS total_score
+        FROM (
+            SELECT user_id, course_id, 5 AS score
+            FROM course_enrollment
+
+            UNION ALL
+
+            SELECT
+                lp.user_id,
+                c.course_id,
+                4 * (
+                    COUNT(DISTINCT CASE WHEN lp.is_completed = 1 THEN lp.chapter_id END)
+                        / NULLIF(cc.total_chapters,0)
+                    ) AS score
+            FROM learning_progress lp
+                     JOIN course_chapter c ON lp.chapter_id = c.id
+                     JOIN (
+                SELECT course_id, COUNT(*) AS total_chapters
+                FROM course_chapter
+                GROUP BY course_id
+            ) cc ON cc.course_id = c.course_id
+            GROUP BY lp.user_id, c.course_id
+
+            UNION ALL
+
+            SELECT user_id, course_id, 3 AS score
+            FROM course_favorite
+            WHERE is_deleted = 0
+
+            UNION ALL
+
+            SELECT user_id, course_id, 2 AS score
+            FROM course_like
+            WHERE is_deleted = 0
+        ) t
+        GROUP BY user_id, course_id
+    </select>
+
+    <!--
+        查询用户已报名的课程ID列表
+    -->
+    <select id="getEnrolledCourseIds" resultType="java.lang.Long">
+        SELECT course_id
+        FROM course_enrollment
+        WHERE user_id = #{userId}
+    </select>
+
+</mapper>

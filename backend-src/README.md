@@ -1,0 +1,134 @@
+# OnlineEducation
+
+## 1. 项目简介
+本系统为《基于SpringBoot + Vue3的在线教育平台》，旨在为讲师与学生提供便捷的在线教学体验。系统主要提供课程分类管理、在线课程学习、系统讲师入驻申请与审核、课程及讲师评价、提问与回答互动功能、用户学习进度追踪以及完善的后台数据统计等功能。
+
+## 2. 系统整体架构说明
+本系统采用完全的前后端分离架构，业务逻辑主要由后端的 Spring Boot 服务提供支持。前端则按业务身份分为三个独立的项目实体，均通过标准的 HTTP RESTful 接口进行数据交互及 JWT 鉴权请求：
+
+- **管理员端（后台管理系统）**  
+  Gitee地址：[https://gitee.com/feng_s/online-education-admin](https://gitee.com/feng_s/online-education-admin)
+
+- **讲师端（讲师管理系统）**  
+  Gitee地址：[https://gitee.com/feng_s/online-education-teacher](https://gitee.com/feng_s/online-education-teacher)
+
+- **用户端（学习平台）**  
+  Gitee地址：[https://gitee.com/feng_s/online-education-app](https://gitee.com/feng_s/online-education-app)
+
+## 3. 运行环境要求
+以下为后端服务及周边组件成功运行的必要环境及版本要求：
+
+- **操作系统**：Windows / Linux / macOS
+- **JDK版本**：JDK 17 （必须为17版本）
+- **Maven版本**：Maven 3.6 及以上
+- **MySQL版本**：MySQL 8.0 及以上
+- **Redis版本**：Redis 5.0 及以上
+- **Node.js版本**：Node.js 18.x 及以上（LTS）（主要针对前端项目运行的必须环境）
+- **推荐浏览器**：Chrome / Edge（最新正式版）
+
+## 4. 数据库部署
+1. **导入SQL脚本**
+   使用 MySQL 数据连接工具（如 Navicat、DataGrip 或 Server 终端）
+   数据库脚本位置：`src/main/resources/sql/online_edu.sql`
+   执行成功后，刷新表列表即可显示平台所需的所有业务表。
+   (注意：测试数据中的图片/视频需要改为自己的文件路径，参考application的文件上传配置，可通过讲师端上传视频查看对应的地址作为参考)
+
+## 5. 修改后端配置
+在启动项目核心代码前，务必先打开配置文件以设置符合你本地环境的数据连接选项。需要修改的配置文件路径如下：
+
+**配置文件路径**：`src/main/resources/application.yml`
+
+需要核对并修改的关键配置项及示例如下：
+
+```yaml
+spring:
+  # 1. 数据库配置
+  datasource:
+    # 确保连接的数据库名为 online_edu
+    url: jdbc:mysql://localhost:3306/online_edu?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root            # 你的 MySQL 账号
+    password: your_password   # 你的 MySQL 密码，修改为本地对应的密码
+
+  # 2. Redis 配置
+  redis:
+    host: localhost           # Redis 服务器地址
+    port: 6379                # Redis 端口号
+    password:                 # Redis 密码（无密码则保持留空）
+    database: 0
+
+  # 3. 邮箱配置 (QQ Mial SMTP)
+  mail:
+    host: smtp.qq.com
+    username: your_email@qq.com       # 发送邮件的QQ邮箱账号
+    password: your_authorization_code # 该邮箱的 SMTP 授权码
+
+# 4. 文件上传路径配置
+file:
+  upload:
+    # 文件本地存放物理路径（Windows环境下默认，若使用 Mac/Linux 请改为形如 /data/upload/online-edu 的合法路径下）
+    path: D:/upload/online-edu
+    url-prefix: http://localhost:8088/files
+
+# 5. 通义千问 API 配置 (用于AI智能回答交互功能)
+qwen:
+  api:
+    key: your-api-key-here # 替换为你在阿里云DashScope申请的真实API Key
+```
+
+## 6. 后端项目启动步骤
+
+该后端作为标准的 Spring Boot 工程，支持 IDEA 本地直接启动与 Maven 运行。**默认端口为 `8088`**。
+
+#### 方式一：使用 IDEA 启动
+1. 使用 IntelliJ IDEA 导入项目文件夹 `online-edu-master`。
+2. 等待 Maven 结构刷新并自动加载完毕全部核心依赖。
+3. 进入目录展开代码结构在 `com.example.onlineedu` 包处找到主启动类 `OnlineEduApplication.java`。
+4. 右键点击并选择 `Run 'OnlineEduApplication'`，启动项目。
+
+#### 方式二：使用 Maven 启动
+1. 在项目的根目录（即 `pom.xml` 同级目录）下，打开命令行（Terminal或CMD）。
+2. 输入以下命令进行一键编译、打包：
+   ```bash
+   mvn clean install -DskipTests
+   ```
+3. 等待编译处理好后，继续执行底层命令启动后端服务：
+   ```bash
+   mvn spring-boot:run
+   ```
+> 当控制台日志不再滚动且最终打印出诸如 `Started OnlineEduApplication in ... seconds` 的提示时，即表示后端服务已成功启动！
+
+## 7. 接口访问测试
+
+本项目已集成了功能丰富的 Swagger/Knife4j 接口文档。当系统启动成功后，可在浏览器中直接访问：
+
+**接口文档访问地址**：  
+[http://localhost:8088/doc.html](http://localhost:8088/doc.html)
+
+**验证方法**：  
+成功加载页面后能渲染出各个类目下的 Controller 接口即可。你可以点击任一不需要 Token 的开放接口或利用【调试】功能发生测试请求数据，如果在返回值中正常收到 HTTP Code 200 即代表业务交互完全连通，数据库数据连接正确。
+
+## 8. 默认测试账号
+
+系统在数据库初始化或有初始用户存量时，建议采用以下角色身份的账号通过前端对应管理系统界面完成不同权重的权限登录验证体验：
+
+- **管理员账号**：`admin` / 密码 `123456`
+- **讲师账号**：`user100` / 密码 `123456`
+- **普通用户账号**：`student01` / 密码 `123456`
+
+## 9. 常见问题说明
+
+**1. 数据库连接失败**
+- **现象特征**：控制台报错 `Communications link failure` 或 `Access denied for user`。
+- **排查解决**：检查 `application.yml` 中对应的本地 `username` 和 `password` 是否配置有误，以及操作系统的 MySQL 数据库是否处于挂起未启动状态。
+
+**2. 端口被占用**
+- **现象特征**：控制台打印红字提示 `Web server failed to start. Port 8088 was already in use.`。
+- **排查解决**：一般意味着电脑上已经有程序占用了 8088 端口。可以通过关闭其它程序，或在 `application.yml` 的 `server.port:` 将其修改为其它安全空闲端口如 `8080/8089` 来规避该错误，变更后端端口后由于前后端分离模式，记得前端接口环境前缀也需进行一并调整。
+
+**3. Redis未启动**
+- **现象特征**：后台在启动连接服务时爆出由于连接失败引起的诸如 `Unable to connect to Redis` 相关底层异常。
+- **排查解决**：前往本地 Redis 程序目录执行守护挂起命令开启服务（例如 Windows 双击运行 `redis-server.exe`）。
+
+**4. 前端调用后无任何接口返回**
+- **现象特征**：请求响应数据卡顿或浏览器的调试抓包内爆出 `Network Error` 和大量跨域验证阻断错误。
+- **排查解决**：一则排查后端是否因为内部逻辑未被正规启动甚至异常宕机。二则关注全局配置文件和代理配置代码中的 baseURL 是否与现在的 `localhost:8088` 一致无误。

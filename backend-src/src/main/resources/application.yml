@@ -1,0 +1,138 @@
+server:
+  port: 8088  #如果端口提示被占用需要修改，前端代理配置对应的端口也需要修改
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: OnlineEdu
+
+  # 数据源配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/online_edu?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root            # 你的 MySQL 账号
+    password: your_password   # 你的 MySQL 密码，修改为本地对应的密码
+
+  # 邮件配置 (QQ Mial SMTP)
+  mail:
+    host: smtp.qq.com
+    port: 465
+    username: your_email@qq.com       # 发送邮件的QQ邮箱账号
+    password: your_authorization_code # 该邮箱的 SMTP 授权码
+    protocol: smtps
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+            required: true
+    default-encoding: UTF-8
+
+  # Redis 配置
+  redis:
+    host: localhost           # Redis 服务器地址
+    port: 6379                # Redis 端口号
+    password:                 # Redis 密码（无密码则保持留空）
+    database: 0
+    timeout: 3000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1ms
+        max-idle: 8
+        min-idle: 0
+
+  # 文件上传配置
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+  # MVC 配置（解决 Swagger 与 Spring Boot 2.6+ 兼容性问题）
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+
+# MyBatis-Plus 配置
+mybatis-plus:
+  # Mapper XML 文件位置
+  mapper-locations: classpath*:/mapper/**/*.xml
+  # 实体类包路径
+  type-aliases-package: com.example.onlineedu.domain.entity
+  configuration:
+    # 开启驼峰命名转换
+    map-underscore-to-camel-case: true
+    # 日志输出
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      # 主键类型（自增）
+      id-type: auto
+      # 逻辑删除字段
+      logic-delete-field: isDeleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      # 自动填充配置
+      update-strategy: not_null
+
+# 文件上传配置
+file:
+  upload:
+    # 文件本地存放物理路径（Windows环境下默认，若使用 Mac/Linux 请改为形如 /data/upload/online-edu 的合法路径下）
+    path: D:/upload/online-edu
+    # 文件访问URL前缀
+    url-prefix: http://localhost:8088/files
+    # 最大文件大小（MB）
+    max-size: 100
+    # 允许的图片类型
+    image-types:
+      - jpg
+      - jpeg
+      - png
+      - gif
+      - bmp
+      - webp
+    # 允许的视频类型
+    video-types:
+      - mp4
+      - avi
+      - mov
+      - wmv
+      - flv
+      - mkv
+
+# JWT 配置
+jwt:
+  # 密钥
+  secret: elgfjegie9p-eljge93p-e39ujpwe4gg-wolrfjhe3o
+  # 过期时间（秒），7天
+  expiration: 604800
+  # Token 前缀
+  token-prefix: Bearer
+  # Token 请求头名称
+  header: Authorization
+
+# Knife4j 配置
+knife4j:
+  enable: true
+  setting:
+    language: zh-CN
+
+# 通义千问 API 配置
+qwen:
+  api:
+    key: your-api-key-here # 替换为你在阿里云DashScope申请的真实API Key
+    url: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
+    model: qwen-plus
+    timeout: 100000  # 超时时间（毫秒）
+
+# Azure Blob Storage 配置（视频存储）
+azure:
+  storage:
+    # 在 Azure Portal 获取连接字符串，或设置环境变量 AZURE_STORAGE_CONNECTION_STRING
+    connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
+    container-name: videos  # 视频容器名称（自动创建）

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.onlineedu.mapper.AdminDashboardMapper">
+
+    <!-- ============ 总览统计 ============ -->
+
+    <select id="selectUserCount" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM `user` WHERE is_deleted = 0
+    </select>
+
+    <!-- 讲师总数：拥有 TEACHER 角色的用户（通过 user_role + role 联查） -->
+    <select id="selectTeacherCount" resultType="java.lang.Integer">
+        SELECT COUNT(DISTINCT ur.user_id)
+        FROM user_role ur
+        JOIN `role` r ON r.id = ur.role_id AND r.is_deleted = 0
+        WHERE r.role_code = 'TEACHER'
+    </select>
+
+    <select id="selectCourseCount" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM course WHERE is_deleted = 0
+    </select>
+
+    <select id="selectStudentCount" resultType="java.lang.Integer">
+        SELECT COUNT(DISTINCT user_id) FROM course_enrollment WHERE is_deleted = 0
+    </select>
+
+    <!-- 评价总数 + 加权平均评分（只映射 reviewCount / avgScore 两个字段） -->
+    <select id="selectReviewSummary" resultType="com.example.onlineedu.domain.vo.AdminDashboardOverviewVO">
+        SELECT
+            IFNULL(SUM(review_count), 0)                                                            AS reviewCount,
+            ROUND(SUM(avg_score * review_count) / NULLIF(SUM(review_count), 0), 1)                 AS avgScore
+        FROM course
+        WHERE is_deleted = 0
+    </select>
+
+    <!-- ============ 折线图 ============ -->
+
+    <!-- 每日新增用户 -->
+    <select id="selectDailyNewUsers" resultType="com.example.onlineedu.domain.dto.DateCountDTO">
+        SELECT
+            DATE_FORMAT(create_time, '%Y-%m-%d') AS date,
+            COUNT(*)                             AS count
+        FROM `user`
+        WHERE is_deleted = 0
+          AND DATE(create_time) &gt;= #{startDate}
+        GROUP BY DATE_FORMAT(create_time, '%Y-%m-%d')
+        ORDER BY date ASC
+    </select>
+
+    <!-- 每日活跃学习人数 -->
+    <select id="selectDailyActiveLearn" resultType="com.example.onlineedu.domain.dto.DateCountDTO">
+        SELECT
+            DATE_FORMAT(last_learn_time, '%Y-%m-%d') AS date,
+            COUNT(DISTINCT user_id)                  AS count
+        FROM course_enrollment
+        WHERE is_deleted = 0
+          AND last_learn_time IS NOT NULL
+          AND DATE(last_learn_time) &gt;= #{startDate}
+        GROUP BY DATE_FORMAT(last_learn_time, '%Y-%m-%d')
+        ORDER BY date ASC
+    </select>
+
+    <!-- 每日新增课程 -->
+    <select id="selectDailyNewCourses" resultType="com.example.onlineedu.domain.dto.DateCountDTO">
+        SELECT
+            DATE_FORMAT(create_time, '%Y-%m-%d') AS date,
+            COUNT(*)                             AS count
+        FROM course
+        WHERE is_deleted = 0
+          AND DATE(create_time) &gt;= #{startDate}
+        GROUP BY DATE_FORMAT(create_time, '%Y-%m-%d')
+        ORDER BY date ASC
+    </select>
+
+    <!-- ============ Top10 排行 ============ -->
+
+    <!-- 热度 Top10（公式与推荐模块一致） -->
+    <select id="selectHotRank" resultType="com.example.onlineedu.domain.vo.CourseRankItemVO">
+        SELECT
+            id          AS courseId,
+            course_name AS courseName,
+            ROUND(student_count * 0.4 + like_count * 0.3 + favorite_count * 0.3, 2) AS value
+        FROM course
+        WHERE is_deleted = 0
+          AND status = 2
+        ORDER BY value DESC
+        LIMIT 10
+    </select>
+
+    <!-- 学习人数 Top10 -->
+    <select id="selectStudentCountRank" resultType="com.example.onlineedu.domain.vo.CourseRankItemVO">
+        SELECT
+            id             AS courseId,
+            course_name    AS courseName,
+            student_count  AS value
+        FROM course
+        WHERE is_deleted = 0
+        ORDER BY student_count DESC
+        LIMIT 10
+    </select>
+
+    <!-- ============ 全平台评分分布 ============ -->
+
+    <select id="selectRatingDist" resultType="com.example.onlineedu.domain.dto.RatingCountDTO">
+        SELECT rating AS rating, COUNT(*) AS count
+        FROM course_review
+        WHERE is_deleted = 0
+        GROUP BY rating
+        ORDER BY rating DESC
+    </select>
+
+</mapper>

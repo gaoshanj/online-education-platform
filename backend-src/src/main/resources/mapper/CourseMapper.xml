@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.onlineedu.mapper.CourseMapper">
+
+    <!--
+        课程评价统计列表查询（管理员/讲师端复用）
+        支持：课程名模糊搜索、讲师ID筛选、评分段筛选、好评率段筛选、动态排序
+        查询 course 表（含冗余统计字段），已发布的课程才有意义（status=2），
+        但此处不限制 status，由业务层决定是否过滤。
+    -->
+    <select id="selectReviewStatPage" resultType="com.example.onlineedu.domain.entity.CourseEntity">
+        SELECT
+            c.id,
+            c.course_name,
+            c.teacher_id,
+            c.cover_image,
+            c.avg_score,
+            c.review_count,
+            c.good_review_rate,
+            c.latest_review_time
+        FROM course c
+        WHERE c.is_deleted = 0
+        <if test="courseName != null and courseName != ''">
+            AND c.course_name LIKE CONCAT('%', #{courseName}, '%')
+        </if>
+        <if test="teacherId != null">
+            AND c.teacher_id = #{teacherId}
+        </if>
+        <!-- 平均评分筛选 -->
+        <if test="avgScoreFilter != null and avgScoreFilter != 'all'">
+            <choose>
+                <when test="avgScoreFilter == 'above4_5'">
+                    AND c.avg_score &gt;= 4.5
+                </when>
+                <when test="avgScoreFilter == 'above4_0'">
+                    AND c.avg_score &gt;= 4.0
+                </when>
+                <when test="avgScoreFilter == 'below3_5'">
+                    AND c.avg_score &lt; 3.5 AND c.review_count &gt; 0
+                </when>
+            </choose>
+        </if>
+        <!-- 好评率筛选 -->
+        <if test="goodReviewRateFilter != null and goodReviewRateFilter != 'all'">
+            <choose>
+                <when test="goodReviewRateFilter == 'above90'">
+                    AND c.good_review_rate &gt;= 90
+                </when>
+                <when test="goodReviewRateFilter == 'above80'">
+                    AND c.good_review_rate &gt;= 80
+                </when>
+                <when test="goodReviewRateFilter == 'below60'">
+                    AND c.good_review_rate &lt; 60 AND c.review_count &gt; 0
+                </when>
+            </choose>
+        </if>
+        <!-- 动态排序 -->
+        <choose>
+            <when test="sortBy == 'reviewCount'">
+                ORDER BY c.review_count DESC, c.latest_review_time DESC
+            </when>
+            <when test="sortBy == 'scoreDesc'">
+                ORDER BY c.avg_score DESC, c.latest_review_time DESC
+            </when>
+            <when test="sortBy == 'scoreAsc'">
+                ORDER BY c.avg_score ASC, c.latest_review_time DESC
+            </when>
+            <when test="sortBy == 'goodRateDesc'">
+                ORDER BY c.good_review_rate DESC, c.latest_review_time DESC
+            </when>
+            <otherwise>
+                ORDER BY c.latest_review_time DESC
+            </otherwise>
+        </choose>
+    </select>
+
+</mapper>

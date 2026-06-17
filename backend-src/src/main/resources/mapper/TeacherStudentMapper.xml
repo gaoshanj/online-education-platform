@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.onlineedu.mapper.TeacherStudentMapper">
+
+    <!--
+        分页查询讲师的学员用户ID列表（去重）
+        只做聚合最近学习时间用于筛选和排序，其余字段在 Service 层 Java 计算
+    -->
+    <select id="selectStudentUserIdPage" resultType="java.lang.Long">
+        SELECT DISTINCT e.user_id
+        FROM course_enrollment e
+        JOIN course c ON c.id = e.course_id AND c.is_deleted = 0
+        JOIN `user` u ON u.id = e.user_id AND u.is_deleted = 0
+        WHERE c.teacher_id = #{teacherId}
+          AND e.is_deleted = 0
+        <if test="nickname != null and nickname != ''">
+            AND (u.nickname LIKE CONCAT('%', #{nickname}, '%')
+             OR  u.username LIKE CONCAT('%', #{nickname}, '%'))
+        </if>
+        <if test="learnStart != null">
+            AND e.last_learn_time &gt;= #{learnStart}
+        </if>
+        <if test="learnEnd != null">
+            AND e.last_learn_time &lt;= #{learnEnd}
+        </if>
+    </select>
+
+</mapper>

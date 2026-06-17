@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.onlineedu.mapper.CourseReviewMapper">
+
+    <!-- 分页查询评价列表（动态条件：评分筛选、我的评价筛选、排序方式） -->
+    <select id="selectReviewPage" resultType="com.example.onlineedu.domain.entity.CourseReviewEntity">
+        SELECT *
+        FROM course_review
+        WHERE course_id = #{courseId}
+          AND is_deleted = 0
+        <if test="rating != null">
+            AND rating = #{rating}
+        </if>
+        <if test="userId != null">
+            AND user_id = #{userId}
+        </if>
+        <choose>
+            <when test="sortType == 'hot'">
+                ORDER BY like_count DESC, create_time DESC
+            </when>
+            <otherwise>
+                ORDER BY create_time DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <!--
+        单课程评价聚合查询：一次取 count/avg/好评数/最新时间
+        供 refreshCourseReviewStat 调用，结果映射到 CourseReviewAggDTO
+    -->
+    <select id="selectReviewStatAgg" resultType="com.example.onlineedu.domain.dto.CourseReviewAggDTO">
+        SELECT
+            COUNT(*)                                             AS reviewCount,
+            IFNULL(AVG(rating), 0)                              AS avgScore,
+            SUM(CASE WHEN rating &gt;= 4 THEN 1 ELSE 0 END)    AS goodReviewCount,
+            MAX(create_time)                                     AS latestReviewTime
+        FROM course_review
+        WHERE course_id = #{courseId}
+          AND is_deleted = 0
+    </select>
+
+</mapper>
