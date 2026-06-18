@@ -80,7 +80,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**") // 所有接口都允许跨域
                 //.allowedOriginPatterns("http://localhost:5173") // 允许前端访问
-                .allowedOriginPatterns("http://localhost:*") // 允许前端访问
+                .allowedOriginPatterns("*") // 允许所有来源（生产环境）
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // 允许的请求方法
                 .allowedHeaders("*") // 允许请求头
                 .allowCredentials(true) // 是否允许携带 cookie
