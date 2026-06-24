@@ -84,8 +84,8 @@ file:
   upload:
     # 文件本地存放物理路径（Windows环境下默认，若使用 Mac/Linux 请改为形如 /data/upload/online-edu 的合法路径下）
     path: D:/upload/online-edu
-    # 文件访问URL前缀
-    url-prefix: http://localhost:8088/files
+    # 文件访问URL前缀（生产环境使用公网IP，通过Nginx 80端口代理）
+    url-prefix: http://104.208.79.162/files
     # 最大文件大小（MB）
     max-size: 100
     # 允许的图片类型

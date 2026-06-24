@@ -1,5 +1,6 @@
 package com.example.onlineedu.config;
 
+import com.example.onlineedu.config.FileUploadConfig;
 import com.example.onlineedu.interceptor.JwtInterceptor;
 import com.example.onlineedu.interceptor.TokenParseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Autowired
     private TokenParseInterceptor tokenParseInterceptor;
+
+    @Autowired
+    private FileUploadConfig fileUploadConfig;
 
     /**
      * 配置拦截器
@@ -64,9 +68,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 文件访问映射
+        // 文件访问映射 - 使用配置文件中的路径，适配 Windows/Linux
+        String uploadPath = fileUploadConfig.getPath().replace("\\", "/");
+        if (!uploadPath.endsWith("/")) uploadPath += "/";
         registry.addResourceHandler("/files/**")
-                .addResourceLocations("file:D:/upload/online-edu/");
+                .addResourceLocations("file:" + uploadPath);
 
         // Knife4j 文档资源
         registry.addResourceHandler("doc.html").addResourceLocations("classpath:/META-INF/resources/");
