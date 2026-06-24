@@ -4,7 +4,7 @@
       <!-- 头部 -->
       <div class="auth-header">
         <router-link to="/" class="auth-logo">
-          <img src="/logo.svg" alt="Logo" class="logo-img" />
+          <img src="/logo.png" alt="神州数码" class="logo-img" />
           <span>在线教育平台</span>
         </router-link>
         <h2 class="auth-title">欢迎回来</h2>
@@ -133,6 +133,11 @@ async function handleSubmit() {
   color: var(--primary);
   text-decoration: none;
   margin-bottom: 16px;
+}
+
+.auth-logo .logo-img {
+  height: 36px;
+  width: auto;
 }
 
 .auth-title {

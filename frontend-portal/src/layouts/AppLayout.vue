@@ -5,7 +5,7 @@
       <div class="header-inner">
         <!-- Logo / 项目名 -->
         <router-link to="/" class="logo">
-          <img src="/logo.svg" alt="Logo" class="logo-img" />
+          <img src="/logo.png" alt="神州数码" class="logo-img" />
           <span class="logo-text">在线教育平台</span>
         </router-link>
 
@@ -152,6 +152,10 @@ onMounted(async () => {
   font-weight: 700;
   color: var(--primary);
   white-space: nowrap;
+}
+.logo-img {
+  height: 32px;
+  width: auto;
 }
 
 /* 导航菜单 */

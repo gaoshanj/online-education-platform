@@ -3,7 +3,7 @@
     <div class="login-card">
       <div class="login-header">
         <div class="login-logo">
-          <img src="/logo.svg" alt="Logo" class="logo-img" />
+          <img src="/logo.png" alt="神州数码" class="logo-img" />
         </div>
         <h2 class="login-title">在线教育讲师端</h2>
         <p class="login-subtitle">Teacher Console</p>
@@ -124,14 +124,15 @@ const handleLogin = async () => {
 }
 
 .login-logo {
-  width: 64px;
-  height: 64px;
   margin: 0 auto 16px;
-  background: linear-gradient(135deg, #1a3a5c, #2563a8);
-  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.login-logo .logo-img {
+  height: 40px;
+  width: auto;
 }
 
 .logo-icon {
