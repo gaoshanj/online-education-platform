@@ -110,4 +110,30 @@
         ORDER BY rating DESC
     </select>
 
+    <!-- ============ 累计数据（自平台启动日起） ============ -->
+
+    <!-- 全量每日新增用户 -->
+    <select id="selectAllDailyNewUsers" resultType="com.example.onlineedu.domain.dto.DateCountDTO">
+        SELECT
+            DATE_FORMAT(create_time, '%Y-%m-%d') AS date,
+            COUNT(*)                             AS count
+        FROM `user`
+        WHERE is_deleted = 0
+          AND create_time IS NOT NULL
+        GROUP BY DATE_FORMAT(create_time, '%Y-%m-%d')
+        ORDER BY date ASC
+    </select>
+
+    <!-- 全量每日学习事件数（基于课程报名/学习的记录） -->
+    <select id="selectAllDailyLearns" resultType="com.example.onlineedu.domain.dto.DateCountDTO">
+        SELECT
+            DATE_FORMAT(COALESCE(create_time, enroll_time), '%Y-%m-%d') AS date,
+            COUNT(*)                                                             AS count
+        FROM course_enrollment
+        WHERE is_deleted = 0
+          AND (create_time IS NOT NULL OR enroll_time IS NOT NULL)
+        GROUP BY DATE_FORMAT(COALESCE(create_time, enroll_time), '%Y-%m-%d')
+        ORDER BY date ASC
+    </select>
+
 </mapper>

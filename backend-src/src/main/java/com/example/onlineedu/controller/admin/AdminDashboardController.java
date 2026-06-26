@@ -3,6 +3,7 @@ package com.example.onlineedu.controller.admin;
 import com.example.onlineedu.annotation.RequireRole;
 import com.example.onlineedu.common.Result;
 import com.example.onlineedu.domain.enums.UserRole;
+import com.example.onlineedu.domain.vo.AdminDashboardCumulativeVO;
 import com.example.onlineedu.domain.vo.AdminDashboardOverviewVO;
 import com.example.onlineedu.domain.vo.AdminDashboardTopCoursesVO;
 import com.example.onlineedu.domain.vo.AdminDashboardTrendVO;
@@ -77,5 +78,16 @@ public class AdminDashboardController {
             @ApiParam("排序指标：hot（热度，默认）/ studentCount（学习人数）")
             @RequestParam(defaultValue = "hot") String rankBy) {
         return Result.success(dashboardService.getTopCourses(rankBy));
+    }
+
+    /**
+     * 5. 累计数据（自平台启动日起）
+     * GET /api/admin/dashboard/cumulative
+     */
+    @ApiOperation("累计趋势数据（累计用户数 + 累计学习次数，从平台启动日到今天）")
+    @GetMapping("/cumulative")
+    @RequireRole({UserRole.ADMIN})
+    public Result<AdminDashboardCumulativeVO> getCumulative() {
+        return Result.success(dashboardService.getCumulativeData());
     }
 }

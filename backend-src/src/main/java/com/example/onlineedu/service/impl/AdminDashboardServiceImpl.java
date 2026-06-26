@@ -148,4 +148,65 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         vo.setItems(items);
         return vo;
     }
+
+    // ======================== 累计数据（自平台启动日起） ========================
+
+    @Override
+    public AdminDashboardCumulativeVO getCumulativeData() {
+        LocalDate today = LocalDate.now();
+
+        // 获取全量每日新增用户数据
+        List<DateCountDTO> rawUsers  = adminDashboardMapper.selectAllDailyNewUsers();
+        List<DateCountDTO> rawLearns = adminDashboardMapper.selectAllDailyLearns();
+
+        // 找到最早的日期作为起点
+        LocalDate earliestDate = today;
+        if (!rawUsers.isEmpty()) {
+            try {
+                LocalDate uMin = LocalDate.parse(rawUsers.get(0).getDate(), DATE_FMT);
+                if (uMin.isBefore(earliestDate)) earliestDate = uMin;
+            } catch (Exception ignored) {}
+        }
+        if (!rawLearns.isEmpty()) {
+            try {
+                LocalDate lMin = LocalDate.parse(rawLearns.get(0).getDate(), DATE_FMT);
+                if (lMin.isBefore(earliestDate)) earliestDate = lMin;
+            } catch (Exception ignored) {}
+        }
+
+        // 构建完整日期序列
+        List<String> dateList = new ArrayList<>();
+        for (LocalDate d = earliestDate; !d.isAfter(today); d = d.plusDays(1)) {
+            dateList.add(d.format(DATE_FMT));
+        }
+
+        // 构建 Map 方便查找
+        Map<String, Integer> userMap = new LinkedHashMap<>();
+        for (DateCountDTO dto : rawUsers) {
+            userMap.put(dto.getDate(), dto.getCount());
+        }
+        Map<String, Integer> learnMap = new LinkedHashMap<>();
+        for (DateCountDTO dto : rawLearns) {
+            learnMap.put(dto.getDate(), dto.getCount());
+        }
+
+        // 计算累计值（单调递增）
+        List<Integer> cumUsers  = new ArrayList<>(dateList.size());
+        List<Integer> cumLearns = new ArrayList<>(dateList.size());
+        int runningUser  = 0;
+        int runningLearn = 0;
+
+        for (String date : dateList) {
+            runningUser  += userMap.getOrDefault(date, 0);
+            runningLearn += learnMap.getOrDefault(date, 0);
+            cumUsers.add(runningUser);
+            cumLearns.add(runningLearn);
+        }
+
+        AdminDashboardCumulativeVO vo = new AdminDashboardCumulativeVO();
+        vo.setDates(dateList);
+        vo.setCumulativeUsers(cumUsers);
+        vo.setCumulativeLearns(cumLearns);
+        return vo;
+    }
 }

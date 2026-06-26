@@ -1,5 +1,6 @@
 package com.example.onlineedu.service;
 
+import com.example.onlineedu.domain.vo.AdminDashboardCumulativeVO;
 import com.example.onlineedu.domain.vo.AdminDashboardOverviewVO;
 import com.example.onlineedu.domain.vo.AdminDashboardTopCoursesVO;
 import com.example.onlineedu.domain.vo.AdminDashboardTrendVO;
@@ -36,4 +37,9 @@ public interface AdminDashboardService {
      * @param rankBy hot-热度 / studentCount-学习人数
      */
     AdminDashboardTopCoursesVO getTopCourses(String rankBy);
+
+    /**
+     * 累计数据（自平台启动日起：累计用户数 + 累计学习次数）
+     */
+    AdminDashboardCumulativeVO getCumulativeData();
 }

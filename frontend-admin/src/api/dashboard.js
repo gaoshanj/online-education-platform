@@ -19,3 +19,8 @@ export function getTopCourses(params) {
 export function getTrendData(params) {
     return request.get('/admin/dashboard/trend', { params })
 }
+
+// 折线图：累计数据（自平台启动日起）
+export function getCumulativeData() {
+    return request.get('/admin/dashboard/cumulative')
+}

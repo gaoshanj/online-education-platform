@@ -58,4 +58,12 @@ public interface AdminDashboardMapper {
 
     /** 全平台评分分布 */
     List<RatingCountDTO> selectRatingDist();
+
+    // ---- 累计数据 ----
+
+    /** 每日新增用户数（从平台启动日到今天） */
+    List<DateCountDTO> selectAllDailyNewUsers();
+
+    /** 每日学习事件数（从平台启动日到今天） */
+    List<DateCountDTO> selectAllDailyLearns();
 }

@@ -39,6 +39,19 @@
       </el-col>
     </el-row>
 
+    <!-- Row 2.5: 累计趋势图（自平台启动日起） -->
+    <el-row>
+      <el-col :span="24">
+        <el-card shadow="never" class="chart-container">
+          <div class="chart-header">
+            <span class="chart-title">累计数据统计（自平台启动日起）</span>
+            <el-tag size="small" type="info">累计用户 & 累计学习</el-tag>
+          </div>
+          <div ref="cumulativeChartRef" class="chart" style="height: 280px;" v-loading="loadingCumulative"></div>
+        </el-card>
+      </el-col>
+    </el-row>
+
     <!-- Row 3: 饼图和条形图 -->
     <el-row :gutter="15">
       <!-- 课程评分分布 -->
@@ -75,7 +88,8 @@ import {
   getDashboardOverview,
   getRatingDistribution,
   getTopCourses,
-  getTrendData
+  getTrendData,
+  getCumulativeData
 } from '@/api/dashboard'
 
 // ----- 第1部分：基础总览数据模块 -----
@@ -113,16 +127,19 @@ const fetchOverviewData = async () => {
 const lineChartRef = ref(null)
 const pieChartRef = ref(null)
 const barChartRef = ref(null)
+const cumulativeChartRef = ref(null)
 
 const lineChart = shallowRef(null)
 const pieChart = shallowRef(null)
 const barChart = shallowRef(null)
+const cumulativeChart = shallowRef(null)
 
 // Resize 响应图表大小
 const handleResize = () => {
   if (lineChart.value) lineChart.value.resize()
   if (pieChart.value) pieChart.value.resize()
   if (barChart.value) barChart.value.resize()
+  if (cumulativeChart.value) cumulativeChart.value.resize()
 }
 
 // ----- 第2部分：趋势折线图 (Trend) -----
@@ -195,6 +212,120 @@ const fetchAllTrendData = async () => {
     console.error('获取多指标趋势数据失败', error)
   } finally {
     loadingTrend.value = false
+  }
+}
+
+// ----- 第2.5部分：累计趋势图（自平台启动日起） -----
+const loadingCumulative = ref(false)
+
+const fetchCumulativeData = async () => {
+  loadingCumulative.value = true
+  try {
+    const res = await getCumulativeData()
+    if (res && res.data) {
+      const { dates, cumulativeUsers, cumulativeLearns } = res.data
+
+      // 当数据点过多时，进行采样以避免图表卡顿（最多显示60个数据点）
+      const MAX_POINTS = 60
+      let sampledDates = dates
+      let sampledUsers = cumulativeUsers
+      let sampledLearns = cumulativeLearns
+
+      if (dates.length > MAX_POINTS) {
+        const step = Math.ceil(dates.length / MAX_POINTS)
+        sampledDates = []
+        sampledUsers = []
+        sampledLearns = []
+        for (let i = 0; i < dates.length; i += step) {
+          sampledDates.push(dates[i])
+          // 累计值取采样点的实际值（不是最后一个）
+          sampledUsers.push(cumulativeUsers[Math.min(i + step - 1, dates.length - 1)])
+          sampledLearns.push(cumulativeLearns[Math.min(i + step - 1, dates.length - 1)])
+        }
+        // 确保包含最后一个点
+        if (sampledDates[sampledDates.length - 1] !== dates[dates.length - 1]) {
+          sampledDates.push(dates[dates.length - 1])
+          sampledUsers.push(cumulativeUsers[cumulativeUsers.length - 1])
+          sampledLearns.push(cumulativeLearns[cumulativeLearns.length - 1])
+        }
+      }
+
+      const option = {
+        tooltip: {
+          trigger: 'axis',
+          formatter: (params) => {
+            let html = `<div style="font-weight:bold">${params[0].axisValue}</div>`
+            params.forEach(p => {
+              html += `<br/>${p.marker} ${p.seriesName}: <b>${p.value}</b>`
+            })
+            return html
+          }
+        },
+        legend: {
+          data: ['累计用户数', '累计学习次数'],
+          top: 0
+        },
+        grid: { top: 35, left: '3%', right: '3%', bottom: '2%', containLabel: true },
+        xAxis: {
+          type: 'category',
+          boundaryGap: false,
+          data: sampledDates,
+          axisLabel: { fontSize: 11, rotate: sampledDates.length > 30 ? 30 : 0 }
+        },
+        yAxis: [
+          {
+            type: 'value',
+            name: '用户数',
+            position: 'left',
+            splitLine: { lineStyle: { type: 'dashed' } }
+          },
+          {
+            type: 'value',
+            name: '学习次数',
+            position: 'right',
+            splitLine: { show: false }
+          }
+        ],
+        series: [
+          {
+            name: '累计用户数',
+            type: 'line',
+            smooth: true,
+            data: sampledUsers,
+            itemStyle: { color: '#409EFF' },
+            areaStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: 'rgba(64,158,255,0.25)' },
+                { offset: 1, color: 'rgba(64,158,255,0.02)' }
+              ])
+            }
+          },
+          {
+            name: '累计学习次数',
+            type: 'line',
+            smooth: true,
+            yAxisIndex: 1,
+            data: sampledLearns,
+            itemStyle: { color: '#67C23A' },
+            areaStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: 'rgba(103,194,58,0.25)' },
+                { offset: 1, color: 'rgba(103,194,58,0.02)' }
+              ])
+            }
+          }
+        ]
+      }
+
+      if (!cumulativeChart.value) {
+        cumulativeChart.value = echarts.init(cumulativeChartRef.value)
+      }
+      cumulativeChart.value.setOption(option, true)
+    }
+  } catch (error) {
+    console.error('获取累计趋势数据失败', error)
+  } finally {
+    loadingCumulative.value = false
   }
 }
 
@@ -314,6 +445,7 @@ const fetchTopCoursesData = async () => {
 onMounted(() => {
   fetchOverviewData()
   fetchAllTrendData()
+  fetchCumulativeData()
   fetchPieData()
   fetchTopCoursesData()
   window.addEventListener('resize', handleResize)
@@ -324,6 +456,7 @@ onUnmounted(() => {
   if (lineChart.value) lineChart.value.dispose()
   if (pieChart.value) pieChart.value.dispose()
   if (barChart.value) barChart.value.dispose()
+  if (cumulativeChart.value) cumulativeChart.value.dispose()
 })
 </script>
 
