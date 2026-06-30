@@ -8,6 +8,7 @@ import com.example.onlineedu.domain.entity.UserEntity;
 import com.example.onlineedu.domain.vo.CourseVO;
 import com.example.onlineedu.mapper.CourseCategoryMapper;
 import com.example.onlineedu.mapper.CourseMapper;
+import com.example.onlineedu.mapper.LearningProgressMapper;
 import com.example.onlineedu.mapper.RecommendMapper;
 import com.example.onlineedu.mapper.UserMapper;
 import com.example.onlineedu.service.RecommendService;
@@ -42,6 +43,9 @@ public class RecommendServiceImpl implements RecommendService {
 
     @Autowired
     private RecommendMapper recommendMapper;
+
+    @Autowired
+    private LearningProgressMapper learningProgressMapper;
 
 
     /**
@@ -347,6 +351,10 @@ public class RecommendServiceImpl implements RecommendService {
         if (teacher != null) {
             vo.setTeacherName(teacher.getNickname() != null ? teacher.getNickname() : teacher.getUsername());
         }
+
+        // 查询该课程所有学员的累计学习时长
+        Integer totalDuration = learningProgressMapper.sumDurationByCourseId(entity.getId());
+        vo.setTotalLearningDuration(totalDuration);
 
         return vo;
     }
