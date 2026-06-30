@@ -5,7 +5,7 @@
       <div class="auth-header">
         <router-link to="/" class="auth-logo">
           <img src="/logo.png" alt="神州数码" class="logo-img" />
-          <span>在线教育平台</span>
+          <span>企业AI + 云能力人才培养平台</span>
         </router-link>
         <h2 class="auth-title">欢迎回来</h2>
         <p class="auth-subtitle">登录以继续学习</p>

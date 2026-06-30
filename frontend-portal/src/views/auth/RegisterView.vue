@@ -4,7 +4,7 @@
       <div class="auth-header">
         <router-link to="/" class="auth-logo">
           <span>📚</span>
-          <span>在线教育平台</span>
+          <span>企业AI + 云能力人才培养平台</span>
         </router-link>
         <h2 class="auth-title">创建账号</h2>
         <p class="auth-subtitle">加入我们，开始学习之旅</p>

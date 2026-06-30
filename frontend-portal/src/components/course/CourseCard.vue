@@ -33,13 +33,17 @@
           {{ formatCount(course.studentCount) }}人已报名
         </span>
       </div>
+      <div class="card-duration" v-if="course.totalLearningDuration != null && course.totalLearningDuration > 0">
+        <el-icon><Timer /></el-icon>
+        累计学习 {{ formatDuration(course.totalLearningDuration) }}
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { UserFilled, TrendCharts, StarFilled } from '@element-plus/icons-vue'
+import { UserFilled, TrendCharts, Timer, StarFilled } from '@element-plus/icons-vue'
 import { Icon } from '@iconify/vue'
 
 const props = defineProps({
@@ -77,6 +81,16 @@ function formatCount(num) {
   if (num >= 10000) return (num / 10000).toFixed(1) + 'w'
   if (num >= 1000) return (num / 1000).toFixed(1) + 'k'
   return String(num)
+}
+
+function formatDuration(seconds) {
+  if (!seconds || seconds <= 0) return '0分钟'
+  const hours = Math.floor(seconds / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  if (hours > 0) {
+    return minutes > 0 ? `${hours}小时${minutes}分钟` : `${hours}小时`
+  }
+  return `${minutes}分钟`
 }
 </script>
 
@@ -198,5 +212,14 @@ function formatCount(num) {
 .meta-enroll {
   color: var(--primary);
   font-weight: 500;
+}
+
+.card-duration {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #E6A23C;
+  margin-top: 4px;
 }
 </style>

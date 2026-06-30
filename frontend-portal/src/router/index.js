@@ -100,7 +100,7 @@ router.beforeEach((to, from, next) => {
     }).catch(() => { })
 
     const token = localStorage.getItem('token')
-    document.title = '在线教育平台'
+    document.title = '企业AI + 云能力人才培养平台'
 
     // 如果想要统一做拦截，可在这里对 requireAuth 做处理
     if (to.meta.requireAuth && !token) {

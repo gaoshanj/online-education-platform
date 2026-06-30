@@ -521,6 +521,10 @@ public class CourseServiceImpl implements CourseService {
             vo.setTeacherName(teacher.getNickname() != null ? teacher.getNickname() : teacher.getUsername());
         }
 
+        // 查询该课程所有学员的累计学习时长
+        Integer totalDuration = learningProgressMapper.sumDurationByCourseId(entity.getId());
+        vo.setTotalLearningDuration(totalDuration);
+
         return vo;
     }
 

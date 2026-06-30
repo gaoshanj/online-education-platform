@@ -196,4 +196,10 @@ public class CourseVO {
      */
     @ApiModelProperty("最新评价时间")
     private LocalDateTime latestReviewTime;
+
+    /**
+     * 学员累计学习时长（秒），该课程所有学员学习时长的总和
+     */
+    @ApiModelProperty("学员累计学习时长（秒）")
+    private Integer totalLearningDuration;
 }

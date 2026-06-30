@@ -6,15 +6,16 @@
         <!-- Logo / 项目名 -->
         <router-link to="/" class="logo">
           <img src="/logo.png" alt="神州数码" class="logo-img" />
-          <span class="logo-text">在线教育平台</span>
+          <span class="logo-text">企业AI + 云能力人才培养平台</span>
         </router-link>
 
         <!-- 主导航菜单 -->
         <nav class="nav-menu">
           <router-link to="/" class="nav-item" :class="{ active: route.name === 'home' }">首页</router-link>
-          <router-link to="/courses" class="nav-item" :class="{ active: route.name === 'courses' }">全部课程</router-link>
-          <router-link to="/teacher-apply" class="nav-item" :class="{ active: ['teacherApplyLanding', 'teacherApplyForm'].includes(route.name) }">讲师入驻</router-link>
-          <router-link to="/ai" class="nav-item" :class="{ active: route.name === 'ai' }">小智 AI 问答</router-link>
+          <router-link to="/courses" class="nav-item" :class="{ active: route.name === 'courses' }">学习路径</router-link>
+          <router-link to="/teacher-apply" class="nav-item" :class="{ active: ['teacherApplyLanding', 'teacherApplyForm'].includes(route.name) }">企业培训解决方案</router-link>
+          <router-link to="/courses" class="nav-item">认证考试</router-link>
+          <router-link to="/ai" class="nav-item" :class="{ active: route.name === 'ai' }">AI助手</router-link>
         </nav>
 
         <!-- 搜索栏 -->

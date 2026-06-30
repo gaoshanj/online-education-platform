@@ -59,7 +59,7 @@
               <!-- 未登录状态 -->
               <div class="user-top" v-if="!isLoggedIn">
                 <el-avatar :size="64" :icon="UserFilled" class="user-avatar" />
-                <div class="user-greeting">Hi，欢迎来到在线教育平台</div>
+                <div class="user-greeting">Hi，欢迎来到企业AI + 云能力人才培养平台</div>
                 <div class="user-btn-group">
                   <el-button type="primary" round class="action-btn" @click="router.push('/login')">登录 / 注册</el-button>
                 </div>
