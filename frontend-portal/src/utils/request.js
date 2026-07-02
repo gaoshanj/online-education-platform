@@ -9,7 +9,7 @@ export function setRouter(r) {
 
 const request = axios.create({
     baseURL: '/api',
-    timeout: 10000 // 修改由 10s 增加到 30s，以便容忍后端同步发邮件等慢速操作
+    timeout: 60000 // AI调用可能较慢，设置60秒超时
 })
 
 // 请求拦截：注入 Token

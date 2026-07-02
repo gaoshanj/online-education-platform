@@ -67,7 +67,7 @@ public class QwenClient {
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("model", model);
             requestBody.put("messages", messages);
-            requestBody.put("max_tokens", maxTokens);
+            requestBody.put("max_completion_tokens", maxTokens);
 
             String jsonBody = objectMapper.writeValueAsString(requestBody);
             log.info("千问API请求: {}", jsonBody);

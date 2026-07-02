@@ -55,6 +55,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/api/app/question/detail/{id}",
                         "/api/app/question/answer/replies/{answerId}",
                         "/api/app/recommend/**",
+                        "/api/app/public-chat/**",
                         //"/api/common/file/**",
                         "/doc.html",
                         "/webjars/**",
