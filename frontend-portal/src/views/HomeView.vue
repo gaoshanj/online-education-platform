@@ -139,6 +139,8 @@
         />
       </template>
     </div>
+    <!-- 右下角AI聊天窗口 -->
+    <ChatWidget />
   </div>
 </template>
 
@@ -149,6 +151,7 @@ import { Menu, Picture, UserFilled, Monitor, Trophy, DocumentChecked } from '@el
 import { getCategories, getBanners, getHotRecommend, getLatestRecommend, getFeaturedRecommend, getPersonalRecommend } from '@/api/course'
 import { useUserStore } from '@/stores/user'
 import CourseSection from '@/components/course/CourseSection.vue'
+import ChatWidget from '@/components/ChatWidget.vue'
 
 const router = useRouter()
 const userStore = useUserStore()

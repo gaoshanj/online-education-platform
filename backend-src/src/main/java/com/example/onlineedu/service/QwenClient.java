@@ -35,6 +35,9 @@ public class QwenClient {
     @Value("${qwen.api.timeout:30000}")
     private long timeout;
 
+    @Value("${qwen.api.max-tokens:1024}")
+    private int maxTokens;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
     private OkHttpClient httpClient;
 
@@ -64,6 +67,7 @@ public class QwenClient {
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("model", model);
             requestBody.put("messages", messages);
+            requestBody.put("max_tokens", maxTokens);
 
             String jsonBody = objectMapper.writeValueAsString(requestBody);
             log.info("千问API请求: {}", jsonBody);

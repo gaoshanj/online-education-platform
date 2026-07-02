@@ -128,8 +128,9 @@ qwen:
   api:
     key: ${AZURE_OPENAI_KEY:your_azure_openai_key}
     url: https://zhice-agen.openai.azure.com/openai/v1/chat/completions
-    model: gpt-5-nano
+    model: gpt-5.4-nano
     timeout: 100000  # 超时时间（毫秒）
+    max-tokens: 1024  # AI回复最大Token数
 
 # Azure Blob Storage 配置（视频存储）
 azure:
